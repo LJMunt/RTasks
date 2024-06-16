@@ -130,7 +130,8 @@ impl TaskList {
             let task: Task = result?;
             tasks.push(task);
         }
-        let id_tracker = tasks.iter().map(|task| task.id).max().unwrap_or(0);
+        let mut id_tracker = tasks.iter().map(|task| task.id).max().unwrap_or(0);
+        id_tracker+=1;
         Ok(TaskList {
             id_tracker,
             title: "Initial".to_string(),
@@ -138,7 +139,7 @@ impl TaskList {
         })
     }
 
-    pub fn save_to_csv<P: AsRef<Path>>(&self, path: P) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn save_to_csv<P: AsRef<Path>>(&self, patih: P) -> Result<(), Box<dyn std::error::Error>> {
         let mut writer = WriterBuilder::new().from_path(path)?;
         for task in &self.list {
             writer.serialize(task)?;
