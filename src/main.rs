@@ -1,118 +1,10 @@
-use std::io;
+mod tasks;
+use std::{env, io};
 use std::io::Write;
 use std::process::exit;
-
-struct Task {
-    id: usize,
-    title: String,
-    description: String,
-    completed: bool
-}
-
-struct TaskList {
-    id_tracker: usize,
-    title: String,
-    list: Vec<Task>
-}
-
-impl Task {
-    pub fn new(id: usize, title: String, description: String) -> Self {
-        Self {id, title, description, completed: false}
-    }
-
-    pub fn complete(&mut self) {
-        self.completed = true;
-    }
-}
-
-impl TaskList {
-
-    pub fn new(title: String) -> Self {
-        Self {id_tracker: 1, title, list: vec![] }
-    }
-
-    pub fn add_task(&mut self) {
-        println!("--------------");
-        let new_title = Self::create_title();
-        println!("Title: {}", &new_title);
-        let new_description = Self::create_description();
-        println!("Description: {}",&new_description);
-        self.list.push(Task::new(self.id_tracker, new_title, new_description));
-        println!("Created Task {} in List {}",&self.id_tracker, &self.title);
-        self.id_tracker += 1;
-    }
-
-    fn create_title() -> String {
-        loop {
-            print!("Enter the Title: ");
-            io::stdout().flush().unwrap();
-            let mut title = String::new();
-            io::stdin().read_line(&mut title).unwrap();
-            if title.len() > 0 && title.len() < 24 {
-                return title
-            } else {
-                println!("Title can't be empty or longer than 24 characters.");
-            }
-        }
-    }
-
-    fn create_description() -> String {
-        loop {
-            print!("Enter the Description: ");
-            io::stdout().flush().unwrap();
-            let mut description = String::new();
-            io::stdin().read_line(&mut description).unwrap();
-            if description.len() > 0 {
-                return description
-            } else {
-                println!("Description can't be empty.")
-            }
-        }
-    }
-
-    pub fn list_completed_tasks(&self) {
-        for task in self.list.iter().filter(|t| t.completed) {
-            println!("{}: {}",task.id,task.title);
-        }
-    }
-
-    pub fn list_uncompleted_tasks(&self) {
-        for task in self.list.iter().filter(|t| !t.completed) {
-            println!("{}: {}",task.id,task.title);
-        }
-    }
-
-    pub fn complete_task(&mut self, id:usize) {
-        if let Some(task) = self.find_task_by_id(id) {
-            if task.completed == false {
-                task.complete();
-            } else {
-                println!("Task {} already complete",id);
-            }
-        } else {
-            println!("Task {} does not exist",id);
-        }
-    }
-
-    pub fn view_task(&mut self, id:usize) {
-        if let Some(task) = self.find_task_by_id(id) {
-            println!("Task {}: {}",task.id, task.title);
-            println!("{}",task.description);
-            if task.completed {
-                println!("Completed.");
-            } else {
-                println!("Incomplete");
-            }
-        } else {
-            println!("Task {} not found",id)
-        }
-
-    }
-
-    fn find_task_by_id(&mut self, id:usize) -> Option<&mut Task> {
-        self.list.iter_mut().find(|task| task.id == id)
-   }
-}
+use serde::{Deserialize, Serialize};
+use serde::de::Error;
+use tasks::TaskList;
 
 enum Command {
     Add,
@@ -152,8 +44,18 @@ impl Command {
 }
 
 fn main() {
+    let args: Vec<String> = env::args().collect();
+    dbg!(&args);
+    if args.len() < 2 || args.len() > 2 {
+        eprintln!("Usage {} /path/to/csv",args[0]);
+        exit(1);
+    }
+    let csv_path = &args[1];
     println!("Welcome to RTasks! Type help for a list of commands.");
-    let mut task_list = TaskList::new("initial".to_string());
+    let mut task_list = TaskList::load_from_csv(&csv_path).unwrap_or_else(|err| {
+        eprintln!("Error loading from CSV: {}",err);
+        TaskList::new("Initial".to_string())
+    });
 
     loop {
         print!("Command: ");
@@ -168,15 +70,19 @@ fn main() {
                 Command::ListCompleted => task_list.list_completed_tasks(),
                 Command::ListUncompleted => task_list.list_uncompleted_tasks(),
                 Command::Complete {task_id} => task_list.complete_task(task_id),
-                Command::Exit => end_rtasks(&task_list.title),
+                Command::Exit => end_rtasks(&task_list, csv_path),
                 Command::Help => help_menu()
             }
         }
     }
 }
 
-fn end_rtasks(list_name: &String) {
-    println!("Thank you. {} has been saved.",list_name);
+fn end_rtasks(list: &TaskList, path: &String) {
+    if let Err(err) = list.save_to_csv(path) {
+        eprintln!("Error saving: {}",err);
+        exit(0);
+    }
+    println!("Thank you. {} has been saved.",list.title);
     exit(0);
 }
 
