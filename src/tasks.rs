@@ -139,7 +139,7 @@ impl TaskList {
         })
     }
 
-    pub fn save_to_csv<P: AsRef<Path>>(&self, path: P) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn save_to_csv<P: AsRef<Path>>(&self, patih: P) -> Result<(), Box<dyn std::error::Error>> {
         let mut writer = WriterBuilder::new().from_path(path)?;
         for task in &self.list {
             writer.serialize(task)?;
