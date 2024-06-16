@@ -130,7 +130,8 @@ impl TaskList {
             let task: Task = result?;
             tasks.push(task);
         }
-        let id_tracker = tasks.iter().map(|task| task.id).max().unwrap_or(0);
+        let mut id_tracker = tasks.iter().map(|task| task.id).max().unwrap_or(0);
+        id_tracker+=1;
         Ok(TaskList {
             id_tracker,
             title: "Initial".to_string(),
