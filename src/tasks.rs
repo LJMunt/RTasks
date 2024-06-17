@@ -35,6 +35,9 @@ impl Task {
         self.completed = true;
     }
 
+    pub fn display(&self) {
+        println!("{}: {} [{}]", self.id, self.title, self.priority);
+    }
 }
 
 impl TaskList {
@@ -102,14 +105,14 @@ impl TaskList {
     }
 
     pub fn list_completed_tasks(&self) {
-        for task in self.list.iter().filter(|t| t.completed) {
-            println!("{}: {}  -- {:?} ", task.id, task.title,task.priority);
+        for mut task in self.list.iter().filter(|t| t.completed) {
+            task.display();
         }
     }
 
-    pub fn list_uncompleted_tasks(&self) {
-        for task in self.list.iter().filter(|t| !t.completed) {
-            println!("{}: {}  --  {:?}", task.id, task.title,task.priority);
+    pub fn list_uncompleted_tasks(&mut self) {
+        for mut task in self.list.iter().filter(|t| !t.completed) {
+            task.display();
         }
     }
 
@@ -166,6 +169,13 @@ impl TaskList {
         }
         let _ = writer.flush();
         Ok(())
+    }
+
+    pub fn list_priorities(&mut self) {
+        self.list.sort_by(|a,b| b.priority.cmp(&a.priority));
+        for mut task in &self.list {
+            task.display();
+        }
     }
 }
 

@@ -12,6 +12,7 @@ enum Command {
     ListUncompleted,
     Complete { task_id: usize },
     ListCompleted,
+    ListPrioritized,
     Help,
     Exit,
 }
@@ -27,6 +28,7 @@ impl Command {
                 .map(|task_id| Command::View { task_id }),
             ["lc"] => Some(Command::ListCompleted),
             ["lu"] => Some(Command::ListUncompleted),
+            ["lp"] => Some(Command::ListPrioritized),
             ["cpl", task_id] => task_id
                 .parse()
                 .ok()
@@ -42,6 +44,7 @@ impl Command {
             Command::View { .. } => "view <id> - Views the task with the entered id.",
             Command::ListCompleted => "lc - Lists all completed tasks",
             Command::ListUncompleted => "lu - Lists all uncompleted tasks",
+            Command::ListPrioritized => "lp - lists all tasks in order of priority",
             Command::Complete { .. } => "cpl <id> - Completes the task with the entered id",
             Command::Help => "help - Shows this help dialog",
             Command::Exit => "exit - Saves the task list and exits.",
@@ -75,6 +78,7 @@ fn main() {
                 Command::View { task_id } => task_list.view_task(task_id),
                 Command::ListCompleted => task_list.list_completed_tasks(),
                 Command::ListUncompleted => task_list.list_uncompleted_tasks(),
+                Command::ListPrioritized => task_list.list_priorities(),
                 Command::Complete { task_id } => task_list.complete_task(task_id),
                 Command::Exit => end_rtasks(&task_list, csv_path),
                 Command::Help => help_menu(),
@@ -98,6 +102,7 @@ fn help_menu() {
     println!("{}", Command::View { task_id: 0 }.as_str());
     println!("{}", Command::ListCompleted.as_str());
     println!("{}", Command::ListUncompleted.as_str());
+    println!("{}", Command::ListPrioritized.as_str());
     println!("{}", Command::Complete { task_id: 0 }.as_str());
     println!("{}", Command::Exit.as_str());
     println!("{}", Command::Help.as_str());
