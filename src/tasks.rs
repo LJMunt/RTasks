@@ -1,14 +1,17 @@
 use csv::{ReaderBuilder, WriterBuilder};
 use serde_derive::{Deserialize, Serialize};
-use std::io;
+use std::{fmt, io};
+use std::fmt::Formatter;
 use std::io::Write;
 use std::path::Path;
+use std::str::FromStr;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Task {
     id: usize,
     title: String,
     description: String,
+    priority: Priority,
     completed: bool,
 }
 
@@ -18,17 +21,22 @@ pub struct TaskList {
     list: Vec<Task>,
 }
 impl Task {
-    pub fn new(id: usize, title: String, description: String) -> Self {
+    pub fn new(id: usize, title: String, description: String, priority: Priority) -> Self {
         Self {
             id,
             title,
             description,
+            priority,
             completed: false,
         }
     }
 
     pub fn complete(&mut self) {
         self.completed = true;
+    }
+
+    pub fn display(&self) {
+        println!("{}: {} [{}]", self.id, self.title, self.priority);
     }
 }
 
@@ -47,8 +55,10 @@ impl TaskList {
         println!("Title: {}", &new_title);
         let new_description = Self::create_description();
         println!("Description: {}", &new_description);
+        let new_priority: Priority = Self::set_priority();
+        println!("Priority: {}", &new_priority);
         self.list
-            .push(Task::new(self.id_tracker, new_title, new_description));
+            .push(Task::new(self.id_tracker, new_title, new_description, new_priority));
         println!("Created Task {} in List {}", &self.id_tracker, &self.title);
         self.id_tracker += 1;
     }
@@ -81,15 +91,28 @@ impl TaskList {
         }
     }
 
-    pub fn list_completed_tasks(&self) {
-        for task in self.list.iter().filter(|t| t.completed) {
-            println!("{}: {}", task.id, task.title);
+    fn set_priority() -> Priority {
+        loop {
+            print!("Enter the Priority: ");
+            io::stdout().flush().unwrap();
+            let mut input = String::new();
+            io::stdin().read_line(&mut input).expect("Failed to read line");
+            match input.trim().parse::<Priority>() {
+                Ok(priority) => return priority,
+                Err(e) => println!("{}",e),
+            }
         }
     }
 
-    pub fn list_uncompleted_tasks(&self) {
-        for task in self.list.iter().filter(|t| !t.completed) {
-            println!("{}: {}", task.id, task.title);
+    pub fn list_completed_tasks(&self) {
+        for mut task in self.list.iter().filter(|t| t.completed) {
+            task.display();
+        }
+    }
+
+    pub fn list_uncompleted_tasks(&mut self) {
+        for mut task in self.list.iter().filter(|t| !t.completed) {
+            task.display();
         }
     }
 
@@ -107,7 +130,7 @@ impl TaskList {
 
     pub fn view_task(&mut self, id: usize) {
         if let Some(task) = self.find_task_by_id(id) {
-            println!("Task {}: {}", task.id, task.title);
+            println!("Task {}: {}  --  {:?}", task.id, task.title, task.priority);
             println!("{}", task.description);
             if task.completed {
                 println!("Completed.");
@@ -139,12 +162,51 @@ impl TaskList {
         })
     }
 
-    pub fn save_to_csv<P: AsRef<Path>>(&self, patih: P) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn save_to_csv<P: AsRef<Path>>(&self, path: P) -> Result<(), Box<dyn std::error::Error>> {
         let mut writer = WriterBuilder::new().from_path(path)?;
         for task in &self.list {
             writer.serialize(task)?;
         }
         let _ = writer.flush();
         Ok(())
+    }
+
+    pub fn list_priorities(&mut self) {
+        self.list.sort_by(|a,b| b.priority.cmp(&a.priority));
+        for mut task in &self.list {
+            task.display();
+        }
+    }
+}
+
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+enum Priority {
+    Critical,
+    High,
+    Medium,
+    Low,
+}
+
+impl FromStr for Priority {
+    type Err = String;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "low" => Ok(Priority::Low),
+            "medium" => Ok(Priority::Medium),
+            "high" => Ok(Priority::High),
+            "critical" => Ok(Priority::Critical),
+            _ => Err(format!("'{}' is not a valid priority",s)),
+        }
+    }
+}
+impl fmt::Display for Priority {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+       let priority_str = match self {
+           Priority::Low => "Low",
+           Priority::Medium => "Medium",
+           Priority::High => "High",
+           Priority::Critical => "Critical",
+       };
+        write!(f, "{}",priority_str)
     }
 }
