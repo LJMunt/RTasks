@@ -199,6 +199,15 @@ impl TaskList {
             println!("Task not found");
         }
     }
+
+    pub fn edit_task(&mut self, id: usize) {
+        if let Some(task) = self.find_task_by_id(id) {
+
+        }
+        else {
+            println!("Task {} not found",id)
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
