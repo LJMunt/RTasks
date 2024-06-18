@@ -19,6 +19,8 @@ pub struct TaskList {
     id_tracker: usize,
     pub(crate) title: String,
     list: Vec<Task>,
+    MAX_SIZE: usize,
+    ERROR_POS: usize
 }
 impl Task {
     pub fn new(id: usize, title: String, description: String, priority: Priority) -> Self {
@@ -38,6 +40,10 @@ impl Task {
     pub fn display(&self) {
         println!("{}: {} [{}]", self.id, self.title, self.priority);
     }
+
+    pub fn change_priority(&mut self, new_priority: Priority) {
+        self.priority = new_priority
+    }
 }
 
 impl TaskList {
@@ -46,10 +52,23 @@ impl TaskList {
             id_tracker: 1,
             title,
             list: vec![],
+            MAX_SIZE: 400000,
+            ERROR_POS: 400004,
         }
+    }
+    fn get_max_size(&self) -> &usize {
+        return &self.MAX_SIZE;
+    }
+
+    fn get_error_pos(&self) -> &usize {
+        return &self.ERROR_POS;
     }
 
     pub fn add_task(&mut self) {
+        if &self.list.len() >= self.get_max_size() {
+            println!("Maximum number of Tasks reached. Remove some to continue.")
+            return;
+        }
         println!("--------------");
         let new_title = Self::create_title();
         println!("Title: {}", &new_title);
@@ -175,6 +194,22 @@ impl TaskList {
         self.list.sort_by(|a,b| b.priority.cmp(&a.priority));
         for mut task in &self.list {
             task.display();
+        }
+    }
+
+    fn get_task_position(&mut self, id: usize) -> usize {
+        if let Some(pos) = self.list.iter().position(|task| task.id == id) {
+            pos
+        } else {
+            400004
+        }
+    }
+
+    fn remove_task(&mut self, pos: usize) {
+        if pos == 400004 {
+            println!("Task not found.");
+        } else {
+            self.list.remove(pos);
         }
     }
 }
