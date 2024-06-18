@@ -2,10 +2,12 @@ use csv::{ReaderBuilder, WriterBuilder};
 use serde_derive::{Deserialize, Serialize};
 use std::{fmt, io};
 use std::fmt::Formatter;
-use std::io::Write;
+use std::io::{BufRead, Write};
 use std::path::Path;
 use std::str::FromStr;
 
+const MAX_SIZE: usize = 400000;
+const ERROR_POS: usize = 400004;
 #[derive(Debug, Serialize, Deserialize)]
 struct Task {
     id: usize,
@@ -38,6 +40,10 @@ impl Task {
     pub fn display(&self) {
         println!("{}: {} [{}]", self.id, self.title, self.priority);
     }
+
+    pub fn change_priority(&mut self, new_priority: Priority) {
+        self.priority = new_priority
+    }
 }
 
 impl TaskList {
@@ -50,6 +56,10 @@ impl TaskList {
     }
 
     pub fn add_task(&mut self) {
+        if &self.list.len() >= &MAX_SIZE {
+            println!("Maximum number of Tasks reached. Remove some to continue.");
+            return;
+        }
         println!("--------------");
         let new_title = Self::create_title();
         println!("Title: {}", &new_title);
@@ -175,6 +185,18 @@ impl TaskList {
         self.list.sort_by(|a,b| b.priority.cmp(&a.priority));
         for mut task in &self.list {
             task.display();
+        }
+    }
+
+    fn get_task_position(&mut self, id: usize) -> Option<usize> {
+        self.list.iter().position(|task| task.id == id)
+        }
+
+    pub fn remove_task(&mut self,id: usize) {
+        if let Some(pos) = self.get_task_position(id) {
+            self.list.remove(pos);
+        } else {
+            println!("Task not found");
         }
     }
 }
