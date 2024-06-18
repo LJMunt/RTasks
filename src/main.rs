@@ -92,7 +92,7 @@ fn main() {
                 Command::ListUncompleted => task_list.list_uncompleted_tasks(),
                 Command::ListPrioritized => task_list.list_priorities(),
                 Command::Complete { task_id } => task_list.complete_task(task_id),
-                Command::Edit {task_id} => task_list.edit_task(task_id)
+                Command::Edit {task_id} => task_list.edit_task(task_id),
                 Command::Remove { task_id} => task_list.remove_task(task_id),
                 Command::Exit => end_rtasks(&task_list, csv_path),
                 Command::Help => help_menu(),

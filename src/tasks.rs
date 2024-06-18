@@ -201,7 +201,24 @@ impl TaskList {
     }
 
     pub fn edit_task(&mut self, id: usize) {
-        if let Some(task) = self.find_task_by_id(id) {
+        if let Some(tpos) = self.get_task_position(id) {
+            println!("Leave fields empty to retain old value.");
+            print!("Title: ");
+            io::stdout().flush().unwrap();
+            let mut new_title = String::new();
+            io::stdin().read_line(&mut new_title).unwrap();
+            if new_title.len() != 0 {
+               self.list[tpos].title = new_title;
+                println!("Title changed!")
+            }
+            print!("Description: ");
+            io::stdout().flush().unwrap();
+            let mut new_description = String::new();
+            io::stdin().read_line(&mut new_description).unwrap();
+            if new_description.len() != 0 {
+                self.list[tpos].description = new_description;
+                println!("Description changed!")
+            }
 
         }
         else {
