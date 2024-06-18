@@ -2,10 +2,12 @@ use csv::{ReaderBuilder, WriterBuilder};
 use serde_derive::{Deserialize, Serialize};
 use std::{fmt, io};
 use std::fmt::Formatter;
-use std::io::Write;
+use std::io::{BufRead, Write};
 use std::path::Path;
 use std::str::FromStr;
 
+const MAX_SIZE: usize = 400000;
+const ERROR_POS: usize = 400004;
 #[derive(Debug, Serialize, Deserialize)]
 struct Task {
     id: usize,
@@ -19,8 +21,6 @@ pub struct TaskList {
     id_tracker: usize,
     pub(crate) title: String,
     list: Vec<Task>,
-    MAX_SIZE: usize,
-    ERROR_POS: usize
 }
 impl Task {
     pub fn new(id: usize, title: String, description: String, priority: Priority) -> Self {
@@ -52,21 +52,12 @@ impl TaskList {
             id_tracker: 1,
             title,
             list: vec![],
-            MAX_SIZE: 400000,
-            ERROR_POS: 400004,
         }
-    }
-    fn get_max_size(&self) -> &usize {
-        return &self.MAX_SIZE;
-    }
-
-    fn get_error_pos(&self) -> &usize {
-        return &self.ERROR_POS;
     }
 
     pub fn add_task(&mut self) {
-        if &self.list.len() >= self.get_max_size() {
-            println!("Maximum number of Tasks reached. Remove some to continue.")
+        if &self.list.len() >= &MAX_SIZE {
+            println!("Maximum number of Tasks reached. Remove some to continue.");
             return;
         }
         println!("--------------");
@@ -197,19 +188,15 @@ impl TaskList {
         }
     }
 
-    fn get_task_position(&mut self, id: usize) -> usize {
-        if let Some(pos) = self.list.iter().position(|task| task.id == id) {
-            pos
-        } else {
-            400004
+    fn get_task_position(&mut self, id: usize) -> Option<usize> {
+        self.list.iter().position(|task| task.id == id)
         }
-    }
 
-    fn remove_task(&mut self, pos: usize) {
-        if pos == 400004 {
-            println!("Task not found.");
-        } else {
+    pub fn remove_task(&mut self,id: usize) {
+        if let Some(pos) = self.get_task_position(id) {
             self.list.remove(pos);
+        } else {
+            println!("Task not found");
         }
     }
 }
