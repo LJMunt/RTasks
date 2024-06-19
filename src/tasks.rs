@@ -2,12 +2,11 @@ use csv::{ReaderBuilder, WriterBuilder};
 use serde_derive::{Deserialize, Serialize};
 use std::{fmt, io};
 use std::fmt::Formatter;
-use std::io::{BufRead, Write};
+use std::io:: {Write};
 use std::path::Path;
 use std::str::FromStr;
 
 const MAX_SIZE: usize = 400000;
-const ERROR_POS: usize = 400004;
 #[derive(Debug, Serialize, Deserialize)]
 struct Task {
     id: usize,
@@ -112,13 +111,13 @@ impl TaskList {
     }
 
     pub fn list_completed_tasks(&self) {
-        for mut task in self.list.iter().filter(|t| t.completed) {
+        for task in self.list.iter().filter(|t| t.completed) {
             task.display();
         }
     }
 
     pub fn list_uncompleted_tasks(&mut self) {
-        for mut task in self.list.iter().filter(|t| !t.completed) {
+        for task in self.list.iter().filter(|t| !t.completed) {
             task.display();
         }
     }
@@ -179,7 +178,7 @@ impl TaskList {
     }
 
     pub fn list_priorities(&mut self) {
-        self.list.sort_by(|a,b| b.priority.cmp(&a.priority));
+        self.list.sort_by(|a,b| a.priority.cmp(&b.priority));
         for task in &self.list {
             task.display();
         }
@@ -222,6 +221,28 @@ impl TaskList {
         }
         else {
             println!("Task {} not found",id)
+        }
+    }
+
+    pub fn list_all_tasks(&mut self) {
+        self.list.sort_by(|a,b| a.id.cmp(&b.id));
+        for task in &self.list {
+            task.display();
+        } 
+    }
+
+    pub fn list_by_priority(&mut self, input: String) {
+        match Priority::from_str(&input) {
+            Ok(priority) => {
+                for task in &self.list {
+                    if task.priority == priority {
+                        task.display();
+                    }
+                }
+            }
+            Err(e) => {
+                println!("Error: {}",e);
+            }
         }
     }
 }
