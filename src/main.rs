@@ -1,6 +1,4 @@
 mod tasks;
-use serde::de::Error;
-use serde::{Deserialize, Serialize};
 use std::io::Write;
 use std::process::exit;
 use std::{env, io};
