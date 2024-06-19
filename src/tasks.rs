@@ -41,9 +41,6 @@ impl Task {
         println!("{}: {} [{}]", self.id, self.title, self.priority);
     }
 
-    pub fn change_priority(&mut self, new_priority: Priority) {
-        self.priority = new_priority
-    }
 }
 
 impl TaskList {
@@ -183,7 +180,7 @@ impl TaskList {
 
     pub fn list_priorities(&mut self) {
         self.list.sort_by(|a,b| b.priority.cmp(&a.priority));
-        for mut task in &self.list {
+        for task in &self.list {
             task.display();
         }
     }
@@ -197,6 +194,34 @@ impl TaskList {
             self.list.remove(pos);
         } else {
             println!("Task not found");
+        }
+    }
+
+    pub fn edit_task(&mut self, id: usize) {
+        if let Some(tpos) = self.get_task_position(id) {
+            println!("Leave fields empty to retain old value.");
+            println!("{}",&self.list[tpos].title);
+            print!("Title: ");
+            io::stdout().flush().unwrap();
+            let mut new_title = String::new();
+            io::stdin().read_line(&mut new_title).unwrap();
+            if !new_title.trim().is_empty() {
+               self.list[tpos].title = new_title;
+                println!("Title changed!")
+            }
+            println!("{}",&self.list[tpos].description);
+            print!("Description: ");
+            io::stdout().flush().unwrap();
+            let mut new_description = String::new();
+            io::stdin().read_line(&mut new_description).unwrap();
+            if !new_description.trim().is_empty() {
+                self.list[tpos].description = new_description;
+                println!("Description changed!")
+            }
+
+        }
+        else {
+            println!("Task {} not found",id)
         }
     }
 }
