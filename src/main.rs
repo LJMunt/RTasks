@@ -1,4 +1,5 @@
 mod tasks;
+
 use std::io::Write;
 use std::process::exit;
 use std::{env, io};
@@ -12,9 +13,9 @@ enum Command {
     ListAll,
     ListCompleted,
     ListPrioritized,
-    PriorityList {priority: String},
-    Edit {task_id: usize},
-    Remove {task_id: usize},
+    PriorityList { priority: String },
+    Edit { task_id: usize },
+    Remove { task_id: usize },
     Help,
     Exit,
 }
@@ -35,7 +36,7 @@ impl Command {
             ["pl", priority] => priority
                 .parse()
                 .ok()
-                .map(|priority| Command::PriorityList {priority}),
+                .map(|priority| Command::PriorityList { priority }),
             ["cpl", task_id] => task_id
                 .parse()
                 .ok()
@@ -43,11 +44,11 @@ impl Command {
             ["remove", task_id] => task_id
                 .parse()
                 .ok()
-                .map(|task_id| Command::Remove {task_id}),
+                .map(|task_id| Command::Remove { task_id }),
             ["edit", task_id] => task_id
                 .parse()
                 .ok()
-                .map(|task_id| Command::Edit {task_id}),
+                .map(|task_id| Command::Edit { task_id }),
             ["help"] => Some(Command::Help),
             ["exit"] => Some(Command::Exit),
             _ => None,
@@ -99,10 +100,10 @@ fn main() {
                 Command::ListCompleted => task_list.list_completed_tasks(),
                 Command::ListUncompleted => task_list.list_uncompleted_tasks(),
                 Command::ListPrioritized => task_list.list_priorities(),
-                Command::PriorityList {priority} => task_list.list_by_priority(priority.to_string()),
+                Command::PriorityList { priority } => task_list.list_by_priority(priority.to_string()),
                 Command::Complete { task_id } => task_list.complete_task(task_id),
-                Command::Edit {task_id} => task_list.edit_task(task_id),
-                Command::Remove { task_id} => task_list.remove_task(task_id),
+                Command::Edit { task_id } => task_list.edit_task(task_id),
+                Command::Remove { task_id } => task_list.remove_task(task_id),
                 Command::Exit => end_rtasks(&task_list, csv_path),
                 Command::Help => help_menu(),
             }
@@ -127,10 +128,10 @@ fn help_menu() {
     println!("{}", Command::ListCompleted.as_str());
     println!("{}", Command::ListUncompleted.as_str());
     println!("{}", Command::ListPrioritized.as_str());
-    println!("{}", Command::PriorityList {priority: 0.to_string() }.as_str());
+    println!("{}", Command::PriorityList { priority: 0.to_string() }.as_str());
     println!("{}", Command::Complete { task_id: 0 }.as_str());
-    println!("{}", Command::Remove {task_id: 0}.as_str());
-    println!("{}", Command::Edit {task_id: 0}.as_str());
+    println!("{}", Command::Remove { task_id: 0 }.as_str());
+    println!("{}", Command::Edit { task_id: 0 }.as_str());
     println!("{}", Command::Exit.as_str());
     println!("{}", Command::Help.as_str());
 }
