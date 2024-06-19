@@ -179,7 +179,7 @@ impl TaskList {
     }
 
     pub fn list_priorities(&mut self) {
-        self.list.sort_by(|a,b| b.priority.cmp(&a.priority));
+        self.list.sort_by(|a,b| a.priority.cmp(&b.priority));
         for task in &self.list {
             task.display();
         }
@@ -226,9 +226,10 @@ impl TaskList {
     }
 
     pub fn list_all_tasks(&mut self) {
-        for task in self.list.iter() {
+        self.list.sort_by(|a,b| a.id.cmp(&b.id));
+        for task in &self.list {
             task.display();
-        }
+        } 
     }
 }
 
