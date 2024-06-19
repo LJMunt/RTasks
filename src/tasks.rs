@@ -230,6 +230,21 @@ impl TaskList {
             task.display();
         } 
     }
+
+    pub fn list_by_priority(&mut self, input: String) {
+        match Priority::from_str(&input) {
+            Ok(priority) => {
+                for task in &self.list {
+                    if task.priority == priority {
+                        task.display();
+                    }
+                }
+            }
+            Err(e) => {
+                println!("Error: {}",e);
+            }
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
