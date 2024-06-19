@@ -224,6 +224,12 @@ impl TaskList {
             println!("Task {} not found",id)
         }
     }
+
+    pub fn list_all_tasks(&mut self) {
+        for task in self.list.iter() {
+            task.display();
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
