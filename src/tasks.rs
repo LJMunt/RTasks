@@ -207,7 +207,7 @@ impl TaskList {
             io::stdout().flush().unwrap();
             let mut new_title = String::new();
             io::stdin().read_line(&mut new_title).unwrap();
-            if new_title.len() != 0 {
+            if !new_title.trim().is_empty() {
                self.list[tpos].title = new_title;
                 println!("Title changed!")
             }
@@ -215,7 +215,7 @@ impl TaskList {
             io::stdout().flush().unwrap();
             let mut new_description = String::new();
             io::stdin().read_line(&mut new_description).unwrap();
-            if new_description.len() != 0 {
+            if !new_description.trim().is_empty() {
                 self.list[tpos].description = new_description;
                 println!("Description changed!")
             }

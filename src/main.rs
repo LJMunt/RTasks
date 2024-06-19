@@ -119,6 +119,7 @@ fn help_menu() {
     println!("{}", Command::ListPrioritized.as_str());
     println!("{}", Command::Complete { task_id: 0 }.as_str());
     println!("{}", Command::Remove {task_id: 0}.as_str());
+    println!("{}", Command::Edit {task_id: 0}.as_str());
     println!("{}", Command::Exit.as_str());
     println!("{}", Command::Help.as_str());
 }
