@@ -11,6 +11,7 @@ enum Command {
     View { task_id: usize },
     ListUncompleted,
     Complete { task_id: usize },
+    ListAll,
     ListCompleted,
     ListPrioritized,
     Edit {task_id: usize},
@@ -28,6 +29,7 @@ impl Command {
                 .parse()
                 .ok()
                 .map(|task_id| Command::View { task_id }),
+            ["la"] => Some(Command::ListAll),
             ["lc"] => Some(Command::ListCompleted),
             ["lu"] => Some(Command::ListUncompleted),
             ["lp"] => Some(Command::ListPrioritized),
@@ -52,6 +54,7 @@ impl Command {
         match self {
             Command::Add => "add - Adds a new task. Requires a title and a description",
             Command::View { .. } => "view <id> - Views the task with the entered id.",
+            Command::ListAll => "la - Lists all tasks that exist.",
             Command::ListCompleted => "lc - Lists all completed tasks",
             Command::ListUncompleted => "lu - Lists all uncompleted tasks",
             Command::ListPrioritized => "lp - lists all tasks in order of priority",
@@ -88,6 +91,7 @@ fn main() {
             match command {
                 Command::Add => task_list.add_task(),
                 Command::View { task_id } => task_list.view_task(task_id),
+                Command::ListAll => task_list.list_all_tasks(),
                 Command::ListCompleted => task_list.list_completed_tasks(),
                 Command::ListUncompleted => task_list.list_uncompleted_tasks(),
                 Command::ListPrioritized => task_list.list_priorities(),
@@ -114,6 +118,7 @@ fn help_menu() {
     println!("Available Commands:");
     println!("{}", Command::Add.as_str());
     println!("{}", Command::View { task_id: 0 }.as_str());
+    println!("{}", Command::ListAll.as_str());
     println!("{}", Command::ListCompleted.as_str());
     println!("{}", Command::ListUncompleted.as_str());
     println!("{}", Command::ListPrioritized.as_str());
