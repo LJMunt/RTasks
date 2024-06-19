@@ -12,6 +12,7 @@ enum Command {
     ListAll,
     ListCompleted,
     ListPrioritized,
+    PriorityList {priority: String},
     Edit {task_id: usize},
     Remove {task_id: usize},
     Help,
@@ -31,6 +32,10 @@ impl Command {
             ["lc"] => Some(Command::ListCompleted),
             ["lu"] => Some(Command::ListUncompleted),
             ["lp"] => Some(Command::ListPrioritized),
+            ["pl", priority] => priority
+                .parse()
+                .ok()
+                .map(|priority| Command::PriorityList {priority}),
             ["cpl", task_id] => task_id
                 .parse()
                 .ok()
@@ -56,6 +61,7 @@ impl Command {
             Command::ListCompleted => "lc - Lists all completed tasks",
             Command::ListUncompleted => "lu - Lists all uncompleted tasks",
             Command::ListPrioritized => "lp - lists all tasks in order of priority",
+            Command::PriorityList { .. } => "pl <priority> - lists all tasks of the entered priority.",
             Command::Complete { .. } => "cpl <id> - Completes the task with the entered id",
             Command::Edit { .. } => "edit <id> - Changes the title or description of a task",
             Command::Remove { .. } => "remove <id> - Deletes the Task with the entered id",
@@ -93,6 +99,7 @@ fn main() {
                 Command::ListCompleted => task_list.list_completed_tasks(),
                 Command::ListUncompleted => task_list.list_uncompleted_tasks(),
                 Command::ListPrioritized => task_list.list_priorities(),
+                Command::PriorityList {priority} => task_list.list_by_priority(priority.to_string()),
                 Command::Complete { task_id } => task_list.complete_task(task_id),
                 Command::Edit {task_id} => task_list.edit_task(task_id),
                 Command::Remove { task_id} => task_list.remove_task(task_id),
@@ -120,6 +127,7 @@ fn help_menu() {
     println!("{}", Command::ListCompleted.as_str());
     println!("{}", Command::ListUncompleted.as_str());
     println!("{}", Command::ListPrioritized.as_str());
+    println!("{}", Command::PriorityList {priority: 0.to_string() }.as_str());
     println!("{}", Command::Complete { task_id: 0 }.as_str());
     println!("{}", Command::Remove {task_id: 0}.as_str());
     println!("{}", Command::Edit {task_id: 0}.as_str());
