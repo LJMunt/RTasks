@@ -1,11 +1,13 @@
 mod tasks;
 mod commands;
+mod task_crypto;
+mod error;
+
 use std::io::Write;
 use std::process::{exit};
 use std::{env, io};
 use tasks::TaskList;
 use commands::Command;
-
 
 fn main() {
     let args: Vec<String> = env::args().collect();
