@@ -9,7 +9,6 @@ pub enum TaskError {
     Utf8(Utf8Error),
     Aes(AesError),
     Hex(hex::FromHexError),
-    Custom(String),
 }
 
 impl fmt::Display for TaskError {
@@ -19,7 +18,6 @@ impl fmt::Display for TaskError {
             TaskError::Utf8(err) => write!(f, "UTF-8 error: {}", err),
             TaskError::Aes(err) => write!(f, "AES error: {:?}", err),
             TaskError::Hex(err) => write!(f, "Hex error: {}", err),
-            TaskError::Custom(err) => write!(f, "Error: {}", err),
         }
     }
 }

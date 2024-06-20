@@ -9,7 +9,6 @@ use std::{env, io};
 use tasks::TaskList;
 use commands::Command;
 
-
 fn main() {
     let args: Vec<String> = env::args().collect();
     dbg!(&args);

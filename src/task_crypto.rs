@@ -3,12 +3,16 @@ use aes_gcm::aead::Aead;
 use hex::{decode, encode};
 use rand::rngs::OsRng;
 use rand::Rng;
-pub fn encrypt(data: &[u8], key: &[u8]) -> Result<String, Box<dyn std::error::Error>> {
-    let key = Key::from_slice(key);
+use crate::error::TaskError;
+pub fn encrypt(data: &[u8], key: &[u8]) -> Result<String, TaskError> {
+    let key = Key::<Aes256Gcm>::from_slice(key);
     let cipher = Aes256Gcm::new(key);
-
-    let nonce = Nonce::from_slice(&OsRng.gen::<[u8; 12]>()); // 96-bits; unique per message
-    let ciphertext = cipher.encrypt(nonce, data).map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
+    
+    let mut nonce = [0u8; 12];
+    OsRng.fill(&mut nonce);
+    let nonce = Nonce::from_slice(&nonce);
+    
+    let ciphertext = cipher.encrypt(nonce, data)?;
     // Combine nonce and ciphertext
     let mut combined = nonce.to_vec();
     combined.extend_from_slice(&ciphertext);
@@ -16,14 +20,14 @@ pub fn encrypt(data: &[u8], key: &[u8]) -> Result<String, Box<dyn std::error::Er
     Ok(encode(combined))
 }
 
-pub fn decrypt(encrypted_data: &str, key: &[u8]) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
-    let key = Key::from_slice(key);
+pub fn decrypt(encrypted_data: &str, key: &[u8]) -> Result<Vec<u8>, TaskError> {
+    let key = Key::<Aes256Gcm>::from_slice(key);
     let cipher = Aes256Gcm::new(key);
 
     let encrypted_data = decode(encrypted_data)?;
-    let (nonce, ciphertext) = encrypted_data.split_at(12); // 12 bytes for the nonce
+    let (nonce, ciphertext) = encrypted_data.split_at(12);
 
-    let nonce = Nonce::from_slice(nonce); // 96-bits
+    let nonce = Nonce::from_slice(nonce);
     let plaintext = cipher.decrypt(nonce, ciphertext)?;
 
     Ok(plaintext)
