@@ -180,7 +180,9 @@ impl TaskList {
     pub fn list_priorities(&mut self) {
         self.list.sort_by(|a,b| a.priority.cmp(&b.priority));
         for task in &self.list {
-            task.display();
+            if !task.completed {
+                task.display();
+            }
         }
     }
 
@@ -235,7 +237,7 @@ impl TaskList {
         match Priority::from_str(&input) {
             Ok(priority) => {
                 for task in &self.list {
-                    if task.priority == priority {
+                    if task.priority == priority && !task.completed {
                         task.display();
                     }
                 }
