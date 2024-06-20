@@ -1,5 +1,8 @@
 mod tasks;
 mod commands;
+mod task_crypto;
+mod error;
+
 use std::io::Write;
 use std::process::{exit};
 use std::{env, io};
