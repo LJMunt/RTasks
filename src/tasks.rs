@@ -171,7 +171,6 @@ impl TaskList {
         }
         else {
         let mut reader = ReaderBuilder::new().from_path(path)?;
-        let mut tasks = Vec::new();
         for result in reader.deserialize() {
             let task: Task = result?;
             tasks.push(task);
