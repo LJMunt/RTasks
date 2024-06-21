@@ -3,7 +3,18 @@ use aes_gcm::aead::Aead;
 use hex::{decode, encode};
 use rand::rngs::OsRng;
 use rand::Rng;
+use sha2::{Sha256, Digest};
 use crate::error::TaskError;
+
+fn derive_key(password: &[u8]) -> [u8; 32] {
+    let mut hasher = Sha256::new();
+    hasher.update(password);
+    let result = hasher.finalize();
+    result.into()
+
+
+}
+
 pub fn encrypt(data: &[u8], key: &[u8]) -> Result<String, TaskError> {
     let key = Key::<Aes256Gcm>::from_slice(key);
     let cipher = Aes256Gcm::new(key);
