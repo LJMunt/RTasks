@@ -195,13 +195,13 @@ impl TaskList {
         writer.flush()?;
 
         if let Some(pw) = password {
-            let mut file = File::open(&path);
+            let file = File::open(&path);
             let mut contents = Vec::new();
             file.unwrap().read_to_end(&mut contents)?;
 
             let encrypted_data = encrypt(&contents, pw.as_bytes())?;
 
-            let mut file = File::create(&path);
+            let file = File::create(&path);
             file.unwrap().write_all(encrypted_data.as_bytes())?;
         }
         Ok(())
