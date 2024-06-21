@@ -12,7 +12,7 @@ use commands::Command;
 fn main() {
     let args: Vec<String> = env::args().collect();
     dbg!(&args);
-    if args.len() < 2 || args.len() > 2 {
+    if args.len() < 2 || args.len() > 3 {
         eprintln!("Usage {} /path/to/csv <optional: password> ", args[0]);
         exit(1);
     }
@@ -42,15 +42,15 @@ fn main() {
                 Command::Complete { task_id } => task_list.complete_task(task_id),
                 Command::Edit { task_id } => task_list.edit_task(task_id),
                 Command::Remove { task_id } => task_list.remove_task(task_id),
-                Command::Exit => end_rtasks(&task_list, csv_path),
+                Command::Exit => end_rtasks(&task_list, csv_path, password),
                 Command::Help => help_menu(),
             }
         }
     }
 }
 
-fn end_rtasks(list: &TaskList, path: &String) {
-    if let Err(err) = list.save_to_csv(path) {
+fn end_rtasks(list: &TaskList, path: &String, password: Option<&str>) {
+    if let Err(err) = list.save_to_csv(path, password) {
         eprintln!("Error saving: {}", err);
         exit(0);
     }
