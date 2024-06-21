@@ -21,7 +21,7 @@ fn main() {
     println!("Welcome to RTasks! Type help for a list of commands.");
     let mut task_list = TaskList::load_from_csv(&csv_path, password).unwrap_or_else(|err| {
         eprintln!("Error loading from CSV: {}", err);
-        TaskList::new("Initial".to_string())
+        TaskList::new(csv_path.to_string())
     });
 
     loop {
