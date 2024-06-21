@@ -1,3 +1,4 @@
+use std::process;
 use aes_gcm::{Aes256Gcm, Key, KeyInit, Nonce};
 use aes_gcm::aead::Aead;
 use hex::{decode, encode};
@@ -41,7 +42,10 @@ pub fn decrypt(encrypted_data: &str, pw: &[u8]) -> Result<Vec<u8>, TaskError> {
     let (nonce, ciphertext) = encrypted_data.split_at(12);
 
     let nonce = Nonce::from_slice(nonce);
-    let plaintext = cipher.decrypt(nonce, ciphertext)?;
+    let plaintext = cipher.decrypt(nonce, ciphertext).map_err(|e| {
+        eprintln!("Decryption failed: {:?}",e);
+        process::exit(1);
+    });
 
-    Ok(plaintext)
+    Ok(plaintext.unwrap())
 }
