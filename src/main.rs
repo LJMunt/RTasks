@@ -13,12 +13,13 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     dbg!(&args);
     if args.len() < 2 || args.len() > 2 {
-        eprintln!("Usage {} /path/to/csv", args[0]);
+        eprintln!("Usage {} /path/to/csv <optional: password> ", args[0]);
         exit(1);
     }
     let csv_path = &args[1];
+    let password = if args.len() > 2 { Some(args[2].as_str()) } else { None };
     println!("Welcome to RTasks! Type help for a list of commands.");
-    let mut task_list = TaskList::load_from_csv(&csv_path).unwrap_or_else(|err| {
+    let mut task_list = TaskList::load_from_csv(&csv_path, password).unwrap_or_else(|err| {
         eprintln!("Error loading from CSV: {}", err);
         TaskList::new("Initial".to_string())
     });
