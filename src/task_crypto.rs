@@ -15,8 +15,9 @@ fn derive_key(password: &[u8]) -> [u8; 32] {
 
 }
 
-pub fn encrypt(data: &[u8], key: &[u8]) -> Result<String, TaskError> {
-    let key = Key::<Aes256Gcm>::from_slice(key);
+pub fn encrypt(data: &[u8], pw: &[u8]) -> Result<String, TaskError> {
+    let key = derive_key(pw);
+    let key = Key::<Aes256Gcm>::from_slice(&key);
     let cipher = Aes256Gcm::new(key);
     
     let mut nonce = [0u8; 12];
@@ -31,8 +32,9 @@ pub fn encrypt(data: &[u8], key: &[u8]) -> Result<String, TaskError> {
     Ok(encode(combined))
 }
 
-pub fn decrypt(encrypted_data: &str, key: &[u8]) -> Result<Vec<u8>, TaskError> {
-    let key = Key::<Aes256Gcm>::from_slice(key);
+pub fn decrypt(encrypted_data: &str, pw: &[u8]) -> Result<Vec<u8>, TaskError> {
+    let key = derive_key(pw);
+    let key = Key::<Aes256Gcm>::from_slice(&key);
     let cipher = Aes256Gcm::new(key);
 
     let encrypted_data = decode(encrypted_data)?;
