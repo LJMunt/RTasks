@@ -1,24 +1,27 @@
 mod tasks;
 mod commands;
+mod task_crypto;
+mod error;
+
 use std::io::Write;
 use std::process::{exit};
 use std::{env, io};
 use tasks::TaskList;
 use commands::Command;
 
-
 fn main() {
     let args: Vec<String> = env::args().collect();
     dbg!(&args);
-    if args.len() < 2 || args.len() > 2 {
-        eprintln!("Usage {} /path/to/csv", args[0]);
+    if args.len() < 2 || args.len() > 3 {
+        eprintln!("Usage {} /path/to/csv <optional: password> ", args[0]);
         exit(1);
     }
     let csv_path = &args[1];
+    let password = if args.len() > 2 { Some(args[2].as_str()) } else { None };
     println!("Welcome to RTasks! Type help for a list of commands.");
-    let mut task_list = TaskList::load_from_csv(&csv_path).unwrap_or_else(|err| {
+    let mut task_list = TaskList::load_from_csv(&csv_path, password).unwrap_or_else(|err| {
         eprintln!("Error loading from CSV: {}", err);
-        TaskList::new("Initial".to_string())
+        TaskList::new(csv_path.to_string())
     });
 
     loop {
@@ -39,15 +42,15 @@ fn main() {
                 Command::Complete { task_id } => task_list.complete_task(task_id),
                 Command::Edit { task_id } => task_list.edit_task(task_id),
                 Command::Remove { task_id } => task_list.remove_task(task_id),
-                Command::Exit => end_rtasks(&task_list, csv_path),
+                Command::Exit => end_rtasks(&task_list, csv_path, password),
                 Command::Help => help_menu(),
             }
         }
     }
 }
 
-fn end_rtasks(list: &TaskList, path: &String) {
-    if let Err(err) = list.save_to_csv(path) {
+fn end_rtasks(list: &TaskList, path: &String, password: Option<&str>) {
+    if let Err(err) = list.save_to_csv(path, password) {
         eprintln!("Error saving: {}", err);
         exit(0);
     }

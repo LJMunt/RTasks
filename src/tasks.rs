@@ -2,9 +2,11 @@ use csv::{ReaderBuilder, WriterBuilder};
 use serde_derive::{Deserialize, Serialize};
 use std::{fmt, io};
 use std::fmt::Formatter;
-use std::io:: {Write};
+use std::fs::File;
+use std::io::{Read, Write};
 use std::path::Path;
 use std::str::FromStr;
+use crate::task_crypto::{decrypt, encrypt};
 
 const MAX_SIZE: usize = 400000;
 #[derive(Debug, Serialize, Deserialize)]
@@ -152,13 +154,29 @@ impl TaskList {
         self.list.iter_mut().find(|task| task.id == id)
     }
 
-    pub fn load_from_csv<P: AsRef<Path>>(path: P) -> Result<Self, Box<dyn std::error::Error>> {
-        let mut reader = ReaderBuilder::new().from_path(path)?;
+    pub fn load_from_csv<P: AsRef<Path>>(path: P, password: Option<&str>) -> Result<Self, Box<dyn std::error::Error>> {
         let mut tasks = Vec::new();
+        if let Some(pwd) = password {
+            let mut file = File::open(&path)?;
+            let mut contents = Vec::new();
+            file.read_to_end(&mut contents)?;
+
+            let decrypted_data = decrypt(&String::from_utf8(contents)?, pwd.as_bytes())?;
+            let mut reader = ReaderBuilder::new().from_reader(decrypted_data.as_slice());
+
+            for result in reader.deserialize() {
+                let task: Task = result?;
+                tasks.push(task);
+            }
+        }
+        else {
+        let mut reader = ReaderBuilder::new().from_path(path)?;
         for result in reader.deserialize() {
             let task: Task = result?;
             tasks.push(task);
         }
+        }
+
         let mut id_tracker = tasks.iter().map(|task| task.id).max().unwrap_or(0);
         id_tracker+=1;
         Ok(TaskList {
@@ -168,12 +186,23 @@ impl TaskList {
         })
     }
 
-    pub fn save_to_csv<P: AsRef<Path>>(&self, path: P) -> Result<(), Box<dyn std::error::Error>> {
-        let mut writer = WriterBuilder::new().from_path(path)?;
+    pub fn save_to_csv<P: AsRef<Path>>(&self, path: P, password: Option<&str>) -> Result<(), Box<dyn std::error::Error>> {
+        let mut writer = WriterBuilder::new().from_path(&path)?;
         for task in &self.list {
             writer.serialize(task)?;
         }
-        let _ = writer.flush();
+        writer.flush()?;
+
+        if let Some(pw) = password {
+            let file = File::open(&path);
+            let mut contents = Vec::new();
+            file.unwrap().read_to_end(&mut contents)?;
+
+            let encrypted_data = encrypt(&contents, pw.as_bytes())?;
+
+            let file = File::create(&path);
+            file.unwrap().write_all(encrypted_data.as_bytes())?;
+        }
         Ok(())
     }
 
