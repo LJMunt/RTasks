@@ -11,9 +11,8 @@ use commands::Command;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    dbg!(&args);
     if args.len() < 2 || args.len() > 3 {
-        eprintln!("Usage {} /path/to/csv <optional: password> ", args[0]);
+        eprintln!("Usage {} <required: file> <optional: password> ", args[0]);
         exit(1);
     }
     let csv_path = &args[1];
